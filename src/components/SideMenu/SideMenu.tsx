@@ -1,17 +1,28 @@
+import { useTheme } from '@emotion/react';
+import { Settings } from '@mui/icons-material';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import MailIcon from '@mui/icons-material/Mail';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import Divider from '@mui/material/Divider';
-import MuiDrawer from '@mui/material/Drawer';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import Person2Icon from '@mui/icons-material/Person2';
+import NextLink from 'next/link';
+
+import EqualizerIcon from '@mui/icons-material/Equalizer';
+import {
+  Divider,
+  Drawer,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemIcon,
+  ListItemText,
+  Theme,
+  useMediaQuery,
+} from '@mui/material';
 import IconButton from '@mui/material/IconButton';
-import List from '@mui/material/List';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import { CSSObject, Theme, styled, useTheme } from '@mui/material/styles';
+import { CSSObject } from '@mui/system';
+import { signOut } from 'next-auth/react';
 import * as React from 'react';
+import scss from './SideMenu.module.scss';
 
 const drawerWidth = 240;
 
@@ -35,103 +46,102 @@ const closedMixin = (theme: Theme): CSSObject => ({
     width: `calc(${theme.spacing(8)} + 1px)`,
   },
 });
-
-const DrawerHeader = styled('div')(({ theme }) => ({
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'flex-end',
-  padding: theme.spacing(0, 1),
-  // necessary for content to be below app bar
-  ...theme.mixins.toolbar,
-}));
-
-const Drawer = styled(MuiDrawer, {
-  shouldForwardProp: (prop) => prop !== 'open',
-})(({ theme, open }) => ({
-  width: drawerWidth,
-  flexShrink: 0,
-  whiteSpace: 'nowrap',
-  boxSizing: 'border-box',
-  ...(open && {
-    ...openedMixin(theme),
-    '& .MuiDrawer-paper': openedMixin(theme),
-  }),
-  ...(!open && {
-    ...closedMixin(theme),
-    '& .MuiDrawer-paper': closedMixin(theme),
-  }),
-}));
+const menuRouteList = ['data', 'profile', 'settings', ''];
+const menuListTranslations = ['Data', 'Profile', 'Settings', 'Sign Out'];
+const menuListIcons = [
+  <EqualizerIcon />,
+  <Person2Icon />,
+  <Settings />,
+  <ExitToAppIcon />,
+];
 
 const SideMenu = () => {
   const theme = useTheme();
+  const mobileCheck = useMediaQuery('(min-width: 600px)');
 
   const [open, setOpen] = React.useState(false);
 
-  const handleDrawerOpen = () => {
-    setOpen(true);
+  const handleDrawerToggle = () => {
+    setOpen(!open);
   };
 
-  const handleDrawerClose = () => {
+  const handleListItemButtonClick = (text: string) => {
+    text === 'Sign Out' ? signOut() : null;
     setOpen(false);
   };
+
   return (
-    <Drawer variant='permanent' open={open}>
-      <DrawerHeader>
-        <IconButton onClick={handleDrawerClose}>
+    <Drawer
+      variant='permanent'
+      anchor='left'
+      open={open}
+      className={scss.sideMenu}
+      sx={{
+        width: drawerWidth,
+        [`& .MuiDrawer-paper`]: {
+          left: 0,
+          top: mobileCheck ? 64 : 57,
+          flexShrink: 0,
+          whiteSpace: 'nowrap',
+          boxSizing: 'border-box',
+          ...(open && {
+            ...openedMixin(theme),
+            '& .MuiDrawer-paper': openedMixin(theme),
+          }),
+          ...(!open && {
+            ...closedMixin(theme),
+            '& .MuiDrawer-paper': closedMixin(theme),
+          }),
+        },
+      }}
+    >
+      <div className={scss.drawerHeader}>
+        <IconButton onClick={handleDrawerToggle}>
           {theme.direction === 'rtl' ? (
             <ChevronRightIcon />
           ) : (
             <ChevronLeftIcon />
           )}
         </IconButton>
-      </DrawerHeader>
+      </div>
+      <Divider />
+
       <Divider />
       <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
+        {menuListTranslations.map((text, index) => (
           <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
+            <NextLink
+              className={scss.link}
+              href={`/dashboard/${menuRouteList[index]}`}
             >
-              <ListItemIcon
+              <ListItemButton
+                onClick={() => handleListItemButtonClick(text)}
+                title={text}
+                aria-label={text}
                 sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
+                  minHeight: 48,
+                  justifyContent: open ? 'initial' : 'center',
+                  px: 2.5,
                 }}
               >
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding sx={{ display: 'block' }}>
-            <ListItemButton
-              sx={{
-                minHeight: 48,
-                justifyContent: open ? 'initial' : 'center',
-                px: 2.5,
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  mr: open ? 3 : 'auto',
-                  justifyContent: 'center',
-                }}
-              >
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} sx={{ opacity: open ? 1 : 0 }} />
-            </ListItemButton>
+                <ListItemIcon
+                  sx={{
+                    minWidth: 0,
+                    mr: open ? 3 : 'auto',
+                    justifyContent: 'center',
+                  }}
+                >
+                  {menuListIcons[index]}
+                </ListItemIcon>
+                <ListItemText
+                  primary={text}
+                  sx={{
+                    color: theme.palette.text.primary,
+                    opacity: open ? 1 : 0,
+                  }}
+                />
+              </ListItemButton>
+            </NextLink>
           </ListItem>
         ))}
       </List>
