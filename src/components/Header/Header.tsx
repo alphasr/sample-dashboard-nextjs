@@ -68,7 +68,6 @@ const Header = (props: HeaderProps) => {
           >
             Academia Classic
           </Typography>
-
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Typography
             variant='h5'
@@ -88,7 +87,6 @@ const Header = (props: HeaderProps) => {
           >
             Academia Classic
           </Typography>
-
           {tabletCheck && (
             <Box sx={{ paddingRight: 5, marginLeft: 'auto' }}>
               <Typography>Signed in as {session?.user?.email}</Typography>
